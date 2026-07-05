@@ -1,0 +1,10 @@
+# Archivos de entorno y contraseñas
+.env
+
+# Carpetas de Python que no hace falta subir
+__pycache__/
+*.pyc
+
+# Si estás usando un entorno virtual, añade también su carpeta (suele llamarse venv o .venv)
+venv/
+.venv/
