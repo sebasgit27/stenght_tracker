@@ -1,9 +1,6 @@
 from typing import Optional, List
 from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
-from sqlmodel import SQLModel
 
 # 1. TABLA INTERMEDIA (Many-to-Many)
 class RoutineExerciseLink(SQLModel, table=True):
@@ -57,7 +54,11 @@ class Session(SQLModel, table=True):
     
     user: Optional[User] = Relationship(back_populates="sessions")
     routine: Optional[Routine] = Relationship(back_populates="sessions")
-    workout_sets: List["WorkoutSet"] = Relationship(back_populates="session")
+
+    workout_sets: List["WorkoutSet"] = Relationship(
+        back_populates="session",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
 # 6. TABLA SERIES (Renombrado a WorkoutSet)
 class WorkoutSet(SQLModel, table=True):
@@ -80,15 +81,3 @@ class WorkoutSet(SQLModel, table=True):
     exercise: Optional[Exercise] = Relationship()
 
 
-# Importa tus modelos y el engine aquí si están en archivos separados
-# from models import User, Routine, Session, WorkoutSet, Exercise
-# from database import engine, get_session
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Esto crea todas las tablas en PostgreSQL cuando arranca la API
-    # (Si ya existen, no hace nada, no borra datos)
-    SQLModel.metadata.create_all(engine)
-    yield
-
-app = FastAPI(lifespan=lifespan, title="Strength Tracker API")

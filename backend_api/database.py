@@ -1,13 +1,17 @@
+import os
+from dotenv import load_dotenv
 from sqlmodel import create_engine, Session
 
-# Reemplaza con tus credenciales reales (idealmente usando variables de entorno)
-# Formato: postgresql://usuario:contraseña@host:puerto/nombre_bd
-DATABASE_URL = "postgresql://postgres:tu_password@localhost:5432/strength_tracker"
+# Esto lee tu archivo .env y carga las variables en el entorno
+load_dotenv() 
 
-# El engine es la conexión física a la BD
-engine = create_engine(DATABASE_URL, echo=True) # echo=True imprime el SQL en la terminal (genial para debuggear)
+# Obtenemos la URL exacta que pusiste en el .env
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Creamos el motor. echo=True imprimirá las consultas SQL en la terminal
+engine = create_engine(DATABASE_URL, echo=True)
 
 def get_session():
-    """Generador de sesiones para la base de datos"""
+    """Generador de sesiones para inyectar en los endpoints de FastAPI"""
     with Session(engine) as session:
         yield session
