@@ -138,14 +138,14 @@ def get_exercise_history(user_id: int, exercise_id: int, db: Session = Depends(g
 @app.delete("/api/sets/{set_id}")
 def delete_workout_set(set_id: int, db: Session = Depends(get_session)):
     """Elimina una serie concreta del historial."""
-    # 1. Buscamos la serie
+    # Buscamos la serie
     set_to_delete = db.get(models.WorkoutSet, set_id)
     
-    # 2. Si no existe, devolvemos un error 404
+    # Si no existe, devolvemos un error 404
     if not set_to_delete:
         raise HTTPException(status_code=404, detail="Serie no encontrada")
     
-    # 3. La borramos de la memoria y hacemos el commit a la base de datos
+    # La borramos de la memoria y hacemos el commit a la base de datos
     db.delete(set_to_delete)
     db.commit()
     
@@ -174,22 +174,19 @@ def update_routine(routine_id: int, routine_data: RoutineUpdate, db: Session = D
     """
     Actualiza el nombre de una rutina y REEMPLAZA su lista de ejercicios.
     """
-    # 1. Buscamos la rutina
+    # Buscamos la rutina
     routine = db.get(models.Routine, routine_id)
     if not routine:
         raise HTTPException(status_code=404, detail="Rutina no encontrada")
     
-    # 2. Actualizamos el nombre si nos has enviado uno nuevo
+    # Actualizamos el nombre si nos has enviado uno nuevo
     if routine_data.name:
         routine.name = routine_data.name
         
-    # 3. Buscamos los nuevos ejercicios en la base de datos
+
     statement = select(models.Exercise).where(models.Exercise.id.in_(routine_data.exercise_ids))
     new_exercises = db.exec(statement).all()
     
-    # 4. ¡La magia! Reemplazamos la lista. 
-    # SQLAlchemy automáticamente borrará los enlaces viejos y creará los nuevos
-    # en la tabla RoutineExerciseLink.
     routine.exercises = new_exercises
     
     # 5. Guardamos los cambios
